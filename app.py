@@ -48,14 +48,16 @@ def resolve_ticker(user_input):
         search_results = yf.Search(user_input, max_results=1)
         quotes = search_results.quotes
         if quotes and len(quotes) > 0:
-            return quotes[0]["symbol"]
+            ticker = quotes[0]["symbol"]
+            name = quotes[0].get("longname", quotes[0]["symbol"])
+            return ticker, name
     except Exception:
         pass
 
     if len(user_input) <= 5 and user_input.isalpha():
-        return user_input.upper()
+        return user_input.upper(), user_input.upper()
 
-    return user_input.upper()
+    return user_input.upper(), user_input.upper()
 
 
 # ********************Data Fetch Functions********************
@@ -375,7 +377,7 @@ if generate:
         st.stop()
 
     with st.spinner("Resolving ticker..."):
-        ticker = resolve_ticker(user_input.strip())
+        ticker, company_name = resolve_ticker(user_input.strip())
 
     try:
         test = yf.Ticker(ticker).history(period="5d")
@@ -393,7 +395,6 @@ if generate:
         st.session_state.recent_tickers = st.session_state.recent_tickers[:5]
 
     with st.spinner(f"Fetching data for {ticker}..."):
-        company_name = yf.Ticker(ticker).info.get("longName", ticker)
         stock_data = get_stock_data(ticker, start, end)
         revenue_data = get_revenue_data(ticker, start, end)
         netprofit_data = get_netprofit_data(ticker, start, end)
@@ -620,7 +621,7 @@ if st.session_state.report_data is not None:
     compare_button = st.button("Compare")
 
     if compare_button and compare_input.strip():
-        ticker2 = resolve_ticker(compare_input.strip())
+        ticker2, company_name_2 = resolve_ticker(compare_input.strip())
 
         try:
             test2 = yf.Ticker(ticker2).history(period="5d")
@@ -632,7 +633,6 @@ if st.session_state.report_data is not None:
             ticker2 = None
 
         if ticker2:
-            company_name_2 = yf.Ticker(ticker2).info.get("longName", ticker2)
             with st.spinner(f"Fetching data for {ticker2}..."):
                 stock_data_2 = get_stock_data(ticker2, comp_start, comp_end)
                 stock_data_1_comp = get_stock_data(ticker, comp_start, comp_end)
