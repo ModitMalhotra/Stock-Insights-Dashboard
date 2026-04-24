@@ -419,7 +419,6 @@ if st.session_state.report_data is not None:
 
     # ********************KPI********************
     st.subheader("Snapshot")
-    st.caption(f"Data from {start.strftime('%b %Y')} to {end.strftime('%b %Y')}")
 
     latest_price = get_last(stock_data["Stock Price"])
     prev_price = (
